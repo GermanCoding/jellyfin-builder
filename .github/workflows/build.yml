@@ -26,33 +26,25 @@ jobs:
       packages: write
 
     steps:
-      # -----------------------------------------------------------------------
-      # Configuration
-      # Adjust the branch names and build-args below to match your repositories.
-      # -----------------------------------------------------------------------
       - name: Set per-environment configuration
         id: config
         run: |
           if [ "${{ github.event.inputs.environment }}" = "stable" ]; then
-            # ── Stable branches ──────────────────────────────────────────────
-            echo "jellyfin_branch=master"            >> "$GITHUB_OUTPUT"
-            echo "jellyfin_web_branch=master"        >> "$GITHUB_OUTPUT"
-            echo "jellyfin_packaging_branch=master"  >> "$GITHUB_OUTPUT"
+            echo "jellyfin_branch=release-10.11.z"       >> "$GITHUB_OUTPUT"
+            echo "jellyfin_web_branch=release-10.11.z"   >> "$GITHUB_OUTPUT"
+            echo "jellyfin_packaging_branch=master"      >> "$GITHUB_OUTPUT"
 
-            echo "image_tag=${{ env.STABLE_TAG }}"      >> "$GITHUB_OUTPUT"
+            echo "image_tag=${{ env.STABLE_TAG }}"       >> "$GITHUB_OUTPUT"
 
-            # ── Stable build-args ────────────────────────────────────────────
-            echo "dotnet_version=9.0"                >> "$GITHUB_OUTPUT"
+            echo "dotnet_version=9.0"                    >> "$GITHUB_OUTPUT"
           else
-            # ── Beta branches ────────────────────────────────────────────────
-            echo "jellyfin_branch=dev"               >> "$GITHUB_OUTPUT"
-            echo "jellyfin_web_branch=dev"           >> "$GITHUB_OUTPUT"
-            echo "jellyfin_packaging_branch=dev"     >> "$GITHUB_OUTPUT"
+            echo "jellyfin_branch=beta-10.11.z"          >> "$GITHUB_OUTPUT"
+            echo "jellyfin_web_branch=beta-10.11.z"      >> "$GITHUB_OUTPUT"
+            echo "jellyfin_packaging_branch=master"      >> "$GITHUB_OUTPUT"
 
             echo "image_tag=${{ env.BETA_TAG }}"         >> "$GITHUB_OUTPUT"
 
-            # ── Beta build-args ──────────────────────────────────────────────
-            echo "dotnet_version=9.0"                >> "$GITHUB_OUTPUT"
+            echo "dotnet_version=9.0"                    >> "$GITHUB_OUTPUT"
           fi
 
       # -----------------------------------------------------------------------
@@ -101,9 +93,6 @@ jobs:
           file: jellyfin-packaging/docker/Dockerfile
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.config.outputs.image_tag }}
-          # ── Build-args ──────────────────────────────────────────────────────
-          # Adjust the values below as needed. Per-environment overrides can be
-          # wired through steps.config.outputs.<key> (see the config step above).
           build-args: |
             PACKAGE_ARCH=amd64
             DOTNET_ARCH=amd64
