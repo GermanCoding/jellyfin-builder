@@ -69,7 +69,7 @@ jobs:
         with:
           repository: GermanCoding/jellyfin
           ref: ${{ steps.config.outputs.jellyfin_branch }}
-          path: jellyfin
+          path: jellyfin-server
 
       # -----------------------------------------------------------------------
       # Build and push
