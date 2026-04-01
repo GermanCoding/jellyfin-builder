@@ -4,3 +4,5 @@ This repo builds custom jellyfin images for my fork of jellyfin. This fork is fo
 
 * [https://github.com/GermanCoding/jellyfin](https://github.com/GermanCoding/jellyfin)
 * [https://github.com/GermanCoding/jellyfin-web](https://github.com/GermanCoding/jellyfin-web)
+* [https://github.com/GermanCoding/jellyfin-packaging](https://github.com/GermanCoding/jellyfin-packaging]
+* [https://github.com/GermanCoding/jellyfin-titanos](https://github.com/GermanCoding/jellyfin-titanos)
