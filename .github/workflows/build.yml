@@ -51,21 +51,21 @@ jobs:
       # Checkout all three source repositories side-by-side in the workspace
       # -----------------------------------------------------------------------
       - name: Clone jellyfin-packaging
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: GermanCoding/jellyfin-packaging
           ref: ${{ steps.config.outputs.jellyfin_packaging_branch }}
           path: jellyfin-packaging
 
       - name: Clone jellyfin-web
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: GermanCoding/jellyfin-web
           ref: ${{ steps.config.outputs.jellyfin_web_branch }}
           path: jellyfin-web
 
       - name: Clone jellyfin
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: GermanCoding/jellyfin
           ref: ${{ steps.config.outputs.jellyfin_branch }}
