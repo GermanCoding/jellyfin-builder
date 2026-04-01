@@ -1,0 +1,102 @@
+name: Build and Push Jellyfin
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Build environment (beta or stable)'
+        required: true
+        type: choice
+        options:
+          - stable
+          - beta
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: germancoding/jellyfin
+  # Image tags per environment — adjust here if needed
+  STABLE_TAG: latest
+  BETA_TAG: beta
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Set per-environment configuration
+        id: config
+        run: |
+          if [ "${{ github.event.inputs.environment }}" = "stable" ]; then
+            echo "jellyfin_branch=release-10.11.z"       >> "$GITHUB_OUTPUT"
+            echo "jellyfin_web_branch=release-10.11.z"   >> "$GITHUB_OUTPUT"
+            echo "jellyfin_packaging_branch=master"      >> "$GITHUB_OUTPUT"
+
+            echo "image_tag=${{ env.STABLE_TAG }}"       >> "$GITHUB_OUTPUT"
+
+            echo "dotnet_version=9.0"                    >> "$GITHUB_OUTPUT"
+          else
+            echo "jellyfin_branch=beta-10.11.z"          >> "$GITHUB_OUTPUT"
+            echo "jellyfin_web_branch=beta-10.11.z"      >> "$GITHUB_OUTPUT"
+            echo "jellyfin_packaging_branch=master"      >> "$GITHUB_OUTPUT"
+
+            echo "image_tag=${{ env.BETA_TAG }}"         >> "$GITHUB_OUTPUT"
+
+            echo "dotnet_version=9.0"                    >> "$GITHUB_OUTPUT"
+          fi
+
+      # -----------------------------------------------------------------------
+      # Checkout all three source repositories side-by-side in the workspace
+      # -----------------------------------------------------------------------
+      - name: Clone jellyfin-packaging
+        uses: actions/checkout@v4
+        with:
+          repository: GermanCoding/jellyfin-packaging
+          ref: ${{ steps.config.outputs.jellyfin_packaging_branch }}
+          path: jellyfin-packaging
+
+      - name: Clone jellyfin-web
+        uses: actions/checkout@v4
+        with:
+          repository: GermanCoding/jellyfin-web
+          ref: ${{ steps.config.outputs.jellyfin_web_branch }}
+          path: jellyfin-web
+
+      - name: Clone jellyfin
+        uses: actions/checkout@v4
+        with:
+          repository: GermanCoding/jellyfin
+          ref: ${{ steps.config.outputs.jellyfin_branch }}
+          path: jellyfin
+
+      # -----------------------------------------------------------------------
+      # Build and push
+      # -----------------------------------------------------------------------
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          # The workspace root is used as the build context so the Dockerfile
+          # can reference all three cloned repositories as sibling directories.
+          context: .
+          file: jellyfin-packaging/docker/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.config.outputs.image_tag }}
+          build-args: |
+            PACKAGE_ARCH=amd64
+            DOTNET_ARCH=amd64
+            QEMU_ARCH=x86_64
+            IMAGE_ARCH=amd64
+            TARGET_ARCH=amd64
+            DOTNET_VERSION=${{ steps.config.outputs.dotnet_version }}
