@@ -2,6 +2,13 @@ name: Build and Push Jellyfin TitanOS
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Build environment (currently only stable)'
+        required: true
+        type: choice
+        options:
+          - stable
 
 env:
   REGISTRY: ghcr.io
