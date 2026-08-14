@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Clone jellyfin-titanos
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: GermanCoding/jellyfin-titanos
           ref: master
